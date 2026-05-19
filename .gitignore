@@ -1,0 +1,15 @@
+# Variáveis de ambiente
+.env
+src/.env
+
+# Dependências PHP
+src/vendor/
+
+# Dependências Node
+frontend/node_modules/
+
+# Build do React
+frontend/build/
+
+# Logs
+*.log
