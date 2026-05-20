@@ -6,6 +6,11 @@ function Vault() {
     
     const [notes, setNotes] = useState([]);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        getNotes().then(setNotes).finally(() => setLoading(false));
+    }, []);
 
     useEffect(() => {
         getNotes().then((data) => {

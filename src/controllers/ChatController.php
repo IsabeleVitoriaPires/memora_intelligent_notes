@@ -28,10 +28,15 @@ class ChatController {
         }
 
         $ai = new AIService();
+        try{
         $response = $ai->ask([
             ['role' => 'system', 'content' => $context],
             ['role' => 'user', 'content' => $data['message']]
         ]);
+        } catch (\Exception $e){
+            http_response_code(502);
+            return ['error' => 'Falha ao comunicar com a IA'];
+        }
 
         $stmt = $this->pdo->prepare("INSERT INTO CONVERSATIONS (USER_MESSAGE, AI_RESPONSE) VALUES (:user_message, :ai_response)");
         $stmt->execute([':user_message' => $data['message'], ':ai_response' => $response]);

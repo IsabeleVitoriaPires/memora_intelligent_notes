@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getNoteById, createNote, updateNote } from '../services/api';
 
-
 function NoteEditor(){
 const { id } = useParams();
 const navigate = useNavigate();
@@ -37,7 +36,6 @@ useEffect(() => {
         })
     }
 }, [id]);
-
 
     return (
         <div className="min-h-screen bg-gray-950 text-white p-8">

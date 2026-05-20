@@ -1,10 +1,39 @@
-# Memora 🧠
+# Memora
 
 Assistente pessoal de anotações com IA. Salve suas notas e converse com a IA sobre o conteúdo que você anotou.
 
+## Funcionalidades
+
+- CRUD completo de notas com tags
+- Chat com IA que usa suas notas como contexto
+- Histórico de conversas persistente
+- Interface responsiva com tema dark
+- Containerização completa com Docker
+
+## Screenshots
+
+<!-- Adicione screenshots aqui -->
+<!-- ![Vault](./screenshots/vault.png) -->
+<!-- ![Chat](./screenshots/chat.png) -->
+
+## Arquitetura
+
+```
+┌─────────────┐     ┌──────────────┐     ┌────────────┐
+│   React     │────▶│   PHP API    │────▶│ PostgreSQL │
+│  (port 3000)│     │  (port 85)   │     │ (port 5433)│
+└─────────────┘     └──────┬───────┘     └────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │  GPT-4 API   │
+                    │  (RapidAPI)  │
+                    └──────────────┘
+```
+
 ## Tecnologias
 
-- **Frontend**: React + Tailwind CSS
+- **Frontend**: React 18 + Tailwind CSS + React Router
 - **Backend**: PHP 8.3 + Apache
 - **Banco de dados**: PostgreSQL
 - **IA**: GPT-4 via RapidAPI
@@ -90,4 +119,21 @@ memora/
 | PUT | /notes/:id | Atualiza nota |
 | DELETE | /notes/:id | Remove nota |
 | POST | /chat | Envia mensagem pra IA |
-| GET | /chat/history | Histórico de conversas |
+| GET | /chat | Histórico de conversas |
+
+## Aprendizados
+
+- Integração com APIs externas (OpenAI/RapidAPI)
+- Arquitetura MVC no backend PHP
+- Gerenciamento de estado no React com hooks
+- Containerização multi-serviço com Docker Compose
+- Tratamento de erros em aplicações full-stack
+- CORS e comunicação frontend ↔ backend
+
+## Melhorias futuras
+
+- [ ] Autenticação de usuários (JWT)
+- [ ] Markdown nas notas
+- [ ] Busca por conteúdo/tags
+- [ ] Streaming de respostas da IA
+- [ ] Testes unitários e de integração

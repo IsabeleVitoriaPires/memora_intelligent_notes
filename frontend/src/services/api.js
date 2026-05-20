@@ -1,76 +1,55 @@
-const BASE_URL = 'http://localhost:85';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:85';
 
 export const getNotes = async () => {
     const res = await fetch(`${BASE_URL}/notes`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
 }
 
-export const getNoteById = (id) => 
-    fetch(`${BASE_URL}/notes/${id}`).then(res => res.json());
+export const getNoteById = async (id) => {
+    const res = await fetch(`${BASE_URL}/notes/${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
 
-
-export const createNote = (data) => {
-    
-    return fetch(`${BASE_URL}/notes`, {
-
+export const createNote = async (data) => {
+    const res = await fetch(`${BASE_URL}/notes`, {
         method: 'POST',
-
         body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
 
-        headers: {
-
-            'Content-Type': 'application/json'
-
-        }
-
-    }).then(res => res.json())
-
-}
-
-export const updateNote = (id, data) => {
-    
-    return fetch(`${BASE_URL}/notes/${id}`, {
-
+export const updateNote = async (id, data) => {
+    const res = await fetch(`${BASE_URL}/notes/${id}`, {
         method: 'PUT',
-
         body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
 
-        headers: {
+export const deleteNote = async (id) => {
+    const res = await fetch(`${BASE_URL}/notes/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
 
-            'Content-Type': 'application/json'
-
-        }
-
-    }).then(res => res.json())
-
-}
-
-export const deleteNote = (id) => {
-    
-    return fetch(`${BASE_URL}/notes/${id}`, {method: 'DELETE'}).then(res => res.json())
-
-}
-
-export const sendMessage = (message) => {
-    
-    return fetch(`${BASE_URL}/chat`, {
-
+export const sendMessage = async (message) => {
+    const res = await fetch(`${BASE_URL}/chat`, {
         method: 'POST',
+        body: JSON.stringify({ message }),
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
 
-        body: JSON.stringify({message}),
-
-        headers: {
-
-            'Content-Type': 'application/json'
-
-        }
-
-    }).then(res => res.json())
-
-}
-
-export const getChatHistory = () => {
-    
-    return fetch(`${BASE_URL}/chat/history`).then(res => res.json())
-
-}
+export const getChatHistory = async () => {
+    const res = await fetch(`${BASE_URL}/chat/history`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};

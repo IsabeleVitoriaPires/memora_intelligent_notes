@@ -1,9 +1,12 @@
 <?php
 
 function getConnection(){
-    $dns = 'pgsql:host=postgres;dbname=postgres';
-    return new PDO($dns, 'postgres', 'teste25',[
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
+ 
+    return new PDO(
+        "pgsql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']}",
+        $_ENV['DB_USER'], $_ENV['DB_PASS'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
 }

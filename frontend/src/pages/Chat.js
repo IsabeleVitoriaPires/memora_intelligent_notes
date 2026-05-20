@@ -33,10 +33,14 @@ function Chat() {
 
         setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
 
-        sendMessage(userMessage).then(response => {
-            setMessages(prev => [...prev, { role: 'ai', text: response }]);
-            setLoading(false);
-        });
+        sendMessage(userMessage)
+            .then(response => {
+                setMessages(prev => [...prev, { role: 'ai', text: response }]);
+            })
+            .catch(() => {
+            setMessages(prev => [...prev, {role: 'ai', text: 'Erro ao obter resposta.'}])
+        })
+        .finally(() => setLoading(false));
     };
 
     const handleKeyDown = (e) => {

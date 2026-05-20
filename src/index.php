@@ -24,10 +24,10 @@ $chatController = new ChatController();
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
 $parts = explode('/', $uri);
-$rote = isset($parts[1]) ? trim($parts[1]) : null;
+$route = isset($parts[1]) ? trim($parts[1]) : null;
 $id = isset($parts[2]) ? (int)$parts[2] : null;
 
-if ($rote === 'notes'){
+if ($route === 'notes'){
     if ($method === 'GET' && $id === null) {
         $result = $noteController->list();
     } 
@@ -46,19 +46,29 @@ if ($rote === 'notes'){
         $result = $noteController->delete($id);
     }   
     else {
-        $result = ['error' => 'Rota não encontrada'];
+        http_response_code(404);
+        echo json_encode(['error' => 'Rota não encontrada']);
+        exit();
     }
 }
 
-if ($rote === 'chat') {
+if ($route === 'chat') {
     if($method === 'POST'){
         $data = json_decode(file_get_contents('php://input'), true);
         $result = $chatController->sendMessage($data);
     } elseif ($method === 'GET') {
         $result = $chatController->getHistory();
     } else {
-        $result = ['error' => 'Rota não encontrada'];
+        http_response_code(404);
+        echo json_encode(['error' => 'Rota não encontrada']);
+        exit();
     }
+}
+
+if (!isset($result)) {
+    http_response_code(404);
+    echo json_encode(['error' => 'Rota não encontrada']);
+    exit();
 }
 
 echo json_encode($result);
