@@ -32,7 +32,7 @@ useEffect(() => {
             getNoteById(id).then(res => {
             setTitle(res.title);
             setContent(res.content);
-            setTags(res.tags ? res.tags.join(', ') : '');
+            setTags(Array.isArray(res.tags) ? res.tags.join(', ') : (res.tags || '').replace(/[{}]/g, ''));
         })
     }
 }, [id]);
