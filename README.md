@@ -20,7 +20,7 @@ Assistente pessoal de anotações com IA. Salve suas notas e converse com a IA s
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌────────────┐
-│   React     │────▶│   PHP API    │────▶│ PostgreSQL │
+│   React     │───▶│   PHP API    │───▶ │ PostgreSQL │
 │  (port 3000)│     │  (port 85)   │     │ (port 5433)│
 └─────────────┘     └──────┬───────┘     └────────────┘
                            │
