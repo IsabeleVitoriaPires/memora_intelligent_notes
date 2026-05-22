@@ -1,74 +1,45 @@
-<?php 
-require_once '/var/www/html/vendor/autoload.php';
-require_once '/var/www/html/controllers/NoteController.php';
-require_once '/var/www/html/controllers/ChatController.php';
+<?php
+  require_once '/var/www/html/vendor/autoload.php';
+  require_once '/var/www/html/Router.php';
+  require_once '/var/www/html/controllers/NoteController.php';
+  require_once '/var/www/html/controllers/ChatController.php';
+  require_once '/var/www/html/controllers/CategoriesController.php';
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Content-Type: application/json");
+  header("Access-Control-Allow-Origin:*");
+  header("Access-Control-Allow-Methods:GET, POST, PUT, DELETE, OPTIONS");
+  header("Content-Type: application/json");
 
-$dotenv = Dotenv\Dotenv::createImmutable('/var/www/html');
-$dotenv->load();
+  $dotenv = Dotenv\Dotenv::createImmutable('/var/www/html');
+  $dotenv->load();
 
-if($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type");
-    http_response_code(200);
-    exit();
-}
+  if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+      header("Access-Control-Allow-Headers: Content-Type");
+      http_response_code(200);
+      exit();
+  }
 
-$noteController = new NoteController();
-$chatController = new ChatController();
+  $noteController = new NoteController();
+  $chatController = new ChatController();
+  $categoriesController = new CategoriesController();
 
-$method = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
-$parts = explode('/', $uri);
-$route = isset($parts[1]) ? trim($parts[1]) : null;
-$id = isset($parts[2]) ? (int)$parts[2] : null;
+  $router = new Router();
+  $data = json_decode(file_get_contents('php://input'), true);
 
-if ($route === 'notes'){
-    if ($method === 'GET' && $id === null) {
-        $result = $noteController->list();
-    } 
-    elseif ($method === 'GET' && $id !== null) {
-        $result = $noteController->findById($id);
-    } 
-    elseif ($method === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $result = $noteController->create($data);
-    } 
-    elseif ($method === 'PUT' && $id !== null) {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $result = $noteController->update($id, $data);
-    } 
-    elseif ($method === 'DELETE' && $id !== null) {
-        $result = $noteController->delete($id);
-    }   
-    else {
-        http_response_code(404);
-        echo json_encode(['error' => 'Rota não encontrada']);
-        exit();
-    }
-}
+  // Notes
+  $router->get('notes', fn() => $noteController->list());
+  $router->get('notes/:id', fn($id) => $noteController->findById($id));
+  $router->post('notes', fn() => $noteController->create($data));
+  $router->put('notes/:id', fn($id) => $noteController->update($id, $data));
+  $router->delete('notes/:id', fn($id) => $noteController->delete($id));
 
-if ($route === 'chat') {
-    if($method === 'POST'){
-        $data = json_decode(file_get_contents('php://input'), true);
-        $result = $chatController->sendMessage($data);
-    } elseif ($method === 'GET') {
-        $result = $chatController->getHistory();
-    } else {
-        http_response_code(404);
-        echo json_encode(['error' => 'Rota não encontrada']);
-        exit();
-    }
-}
+  // Chat
+  $router->get('chat', fn() => $chatController->getHistory());
+  $router->post('chat', fn() => $chatController->sendMessage($data));
 
-if (!isset($result)) {
-    http_response_code(404);
-    echo json_encode(['error' => 'Rota não encontrada']);
-    exit();
-}
+  // Categories
+  $router->get('categories', fn() => $categoriesController->list());
+  $router->post('categories', fn() => $categoriesController->create($data));
+  $router->delete('categories/:id', fn($id) => $categoriesController->delete($id));
 
-echo json_encode($result);
+  $result = $router->resolve($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+  echo json_encode($result);

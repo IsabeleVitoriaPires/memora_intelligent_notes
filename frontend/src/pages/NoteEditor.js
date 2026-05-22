@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getNoteById, createNote, updateNote } from '../services/api';
+import { getNoteById, createNote, updateNote, getCategories, createCategory, deleteCategory } from '../services/api';
 
 function NoteEditor(){
 const { id } = useParams();
@@ -9,6 +9,13 @@ const navigate = useNavigate();
 const [title, setTitle] = useState('');
 const [content, setContent] = useState('');
 const [tags, setTags] = useState('');
+const [categories, setCategories] = useState([]);
+const [categoryId, setCategoryId] = useState('');
+const [autoClassify, setAutoClassify] = useState(false);
+
+useEffect(() => {
+    getCategories().then(setCategories);
+}, []);
 
 const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,7 +23,9 @@ const handleSubmit = (e) => {
     const data = {
         title,
         content,
-        tags: tags.split(',').map(t => t.trim()).filter(t => t)
+        tags: tags.split(',').map(t => t.trim()).filter(t => t),
+        category_id: categoryId,
+        auto_classify: autoClassify
     };
 
     if(id){
@@ -33,6 +42,7 @@ useEffect(() => {
             setTitle(res.title);
             setContent(res.content);
             setTags(Array.isArray(res.tags) ? res.tags.join(', ') : (res.tags || '').replace(/[{}]/g, ''));
+            setCategoryId(res.category_id ?? '')
         })
     }
 }, [id]);
@@ -85,6 +95,32 @@ useEffect(() => {
                             className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
                             placeholder="ex: react, php, docker"
                         />
+                    </div>
+                    {!autoClassify && (
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1">Categoria</label>
+                        <select
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                        >
+                            <option value="">Sem categoria</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>)}
+                    <div className='flex items-center gap-2'>
+                        <input 
+                            type="checkbox"
+                            id="autoClassify"
+                            checked={autoClassify}
+                            onChange={(e) => setAutoClassify(e.target.checked)}
+                            className="w-4 h-4 accent-purple-500"
+                        />
+                        <label htmlFor="autoClassify" className="text-sm text-gray-400">
+                            Classificar automaticamente com IA
+                        </label>
                     </div>
                     <button
                         type="submit"

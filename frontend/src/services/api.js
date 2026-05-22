@@ -53,3 +53,25 @@ export const getChatHistory = async () => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
 };
+
+export const getCategories = async () => {
+    const res = await fetch(`${BASE_URL}/categories`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+}
+
+export const createCategory = async (data) => {
+    const res = await fetch(`${BASE_URL}/categories`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
+
+export const deleteCategory = async (id) => {
+    const res = await fetch(`${BASE_URL}/categories/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};

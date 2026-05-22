@@ -45,6 +45,12 @@ function Vault() {
                         >
                             + Nova Nota
                         </button>
+                        <button
+                            onClick={() => navigate('/categories')}
+                            className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition text-sm"
+                        >
+                            Categorias
+                        </button>
                     </div>
                 </div>
             </header>
@@ -88,19 +94,27 @@ function Vault() {
                         {filtered.map(note => (
                             <div
                                 key={note.id}
-                                className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-purple-700 hover:shadow-lg hover:shadow-purple-900/10 transition group"
+                                className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-purple-700 hover:shadow-lg hover:shadow-purple-900/10 transition group flex flex-col"
                             >
                                 <h2 className="text-lg font-semibold mb-2 group-hover:text-purple-300 transition">{note.title}</h2>
                                 <p className="text-gray-400 text-sm mb-4 line-clamp-3">{note.content}</p>
-                                {note.tags && note.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5 mb-4">
-                                        {(Array.isArray(note.tags) ? note.tags : note.tags.replace(/[{}]/g, '').split(',')).map((tag, i) => (
-                                            <span key={i} className="text-xs bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">
-                                                {tag.trim()}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
+                                <div className="mt-auto">
+                                    {(note.category_name || (note.tags && note.tags.length > 0)) && (
+                                        <div className="flex flex-wrap gap-1.5 mb-3">
+                                            {note.category_name && (
+                                                <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">
+                                                    {note.category_name}
+                                                </span>
+                                            )}
+                                            {note.tags && note.tags.length > 0 && (
+                                                (Array.isArray(note.tags) ? note.tags : note.tags.replace(/[{}]/g, '').split(',')).map((tag, i) => (
+                                                    <span key={i} className="text-xs bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">
+                                                        {tag.trim()}
+                                                    </span>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => navigate(`/note/${note.id}`)}
@@ -114,6 +128,7 @@ function Vault() {
                                     >
                                         Excluir
                                     </button>
+                                </div>
                                 </div>
                             </div>
                         ))}
