@@ -52,9 +52,10 @@ class NoteController {
                     'categories' => $categoryNames
                 ]);
 
+                $cleanResponse = strtolower(trim(preg_replace('/[^a-zA-Z0-9À-ÿ\s]/', '', $aiResponse)));
                 $matched = false;
                 foreach ($categories as $cat) {
-                    if (strtolower(trim($aiResponse)) === strtolower(trim($cat['name']))) {
+                    if ($cleanResponse === strtolower(trim($cat['name']))) {
                         $data['category_id'] = $cat['id'];
                         $matched = true;
                         break;

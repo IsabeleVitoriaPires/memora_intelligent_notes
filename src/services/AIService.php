@@ -13,17 +13,17 @@ class AIService {
         $client = new \GuzzleHttp\Client();
         $response = $client->post('https://api.groq.com/openai/v1/chat/completions', [
             'headers' => [
-                'Content-Type'  => 'application/json',
-                'Authorization' => 'Bearer ' . $apiKey
+                  'Content-Type'  => 'application/json',
+                  'Authorization' => 'Bearer ' . $apiKey
             ],
             'json' => [
-                'model'    => 'llama-3.1-8b-instant',
-                'messages' => $messages
+                  'model'    => 'llama-3.1-8b-instant',
+                  'messages' => $messages
             ]
         ]);
 
-        $data = json_decode($response->getBody(), true);
-        return $data['choices'][0]['message']['content'] ?? 'Sem resposta';
+          $data = json_decode($response->getBody(), true);
+          return $data['choices'][0]['message']['content'] ?? 'Sem resposta';
     }
 
     public function classify(array $data){
@@ -32,10 +32,11 @@ class AIService {
         $categories = $data['categories'];
         $categoriesList = implode(', ', $categories);
 
-        $prompt = "Classifique a nota abaixo em UMA das categorias: {$categoriesList}.\n" .
-                  "Responda APENAS o nome exato da categoria, nada mais.\n" .
-                  "Titulo: {$title}\n" .
-                  "Conteudo: {$content}";
+        $prompt = "Classifique a nota abaixo em UMA das categorias: {$categoriesList}. \n
+        Responda APENAS o nome exato da categoria, nada mais. \n
+        Titulo: {$title} \n
+        Conteudo: {$content}
+        ";
 
         return $this->ask([
             ['role' => 'user', 'content' => $prompt]
