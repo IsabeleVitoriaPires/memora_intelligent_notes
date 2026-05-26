@@ -29,34 +29,61 @@ class NoteController {
             return ['erro' => 'title e content são obrigatórios'];
         }
 
-        if(!empty($data['auto_classify'])){
-            $stmt = $this->pdo->query("SELECT ID, NAME FROM CATEGORIES");
-            $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $categoryNames = array_column($categories, 'name');
-            $ai = new AIService();
-            $aiResponse = $ai->classify([
-                'title' => $data['title'], 
-                'content' => $data['content'], 
-                'categories' => $categoryNames
-            ]);
+        $stmt = $this->pdo->query("SELECT VALUE FROM SETTINGS WHERE KEY = 'auto_classify'");
+        $autoClassify = $stmt->fetchColumn() === 'true';
 
-            foreach ($categories as $cat) {
-                if (strtolower(trim($aiResponse)) === strtolower(trim($cat['name']))) {
-                    $data['category_id'] = $cat['id'];
-                    break;
+        $classifyWarning = null;
+
+        if($autoClassify){
+            try {
+                $stmt = $this->pdo->query("SELECT ID, NAME FROM CATEGORIES");
+                $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (empty($categories)) {
+                    $classifyWarning = 'Nenhuma categoria cadastrada. Crie categorias para a IA conseguir classificar suas notas.';
+                    goto insert;
                 }
+
+                $categoryNames = array_column($categories, 'name');
+                $ai = new AIService();
+                $aiResponse = $ai->classify([
+                    'title'      => $data['title'],
+                    'content'    => $data['content'],
+                    'categories' => $categoryNames
+                ]);
+
+                $matched = false;
+                foreach ($categories as $cat) {
+                    if (strtolower(trim($aiResponse)) === strtolower(trim($cat['name']))) {
+                        $data['category_id'] = $cat['id'];
+                        $matched = true;
+                        break;
+                    }
+                }
+
+                if (!$matched) {
+                    $classifyWarning = "A IA não conseguiu identificar a categoria. Resposta recebida: \"{$aiResponse}\"";
+                }
+
+            } catch (\Exception $e) {
+                $classifyWarning = 'Falha ao comunicar com a IA: ' . $e->getMessage();
             }
         }
 
+        insert:
         $stmt = $this->pdo->prepare("INSERT INTO NOTES (TITLE, CONTENT, TAGS, CATEGORY_ID) VALUES (:title, :content, :tags, :category_id)");
         $stmt->execute([
             ':title' => $data['title'],
             ':content' => $data['content'],
             ':tags' => is_array($data['tags']) ? '{' . implode(',', $data['tags']) . '}' : $data['tags'],
-            ':category_id' => $data['category_id'] ?? null
+            ':category_id' => !empty($data['category_id']) ? (int)$data['category_id'] : null
         ]);
         http_response_code(201);
-        return ['id' => $this->pdo->lastInsertId(), 'message' => 'Nota criada'];
+        $response = ['id' => $this->pdo->lastInsertId(), 'message' => 'Nota criada'];
+        if ($classifyWarning) {
+            $response['warning'] = $classifyWarning;
+        }
+        return $response;
     }
     
     public function update(int $id, array $data){
@@ -66,7 +93,7 @@ class NoteController {
             ':title' => $data['title'],
             ':content' => $data['content'],
             ':tags' => is_array($data['tags']) ? '{' . implode(',', $data['tags']) . '}' : $data['tags'],
-            ':category_id' => $data['category_id'] ?? null
+            ':category_id' => !empty($data['category_id']) ? (int)$data['category_id'] : null
         ]);
         return $stmt->rowCount();
     }

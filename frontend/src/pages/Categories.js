@@ -6,6 +6,7 @@ function Categories() {
     const [categories, setCategories] = useState([]);
     const [name, setName] = useState('');
     const [color, setColor] = useState('#a855f7');
+    const [confirmDelete, setConfirmDelete] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,9 +23,10 @@ function Categories() {
         });
     };
 
-    const handleDelete = (id) => {
-        deleteCategory(id).then(() => {
-            setCategories(categories.filter(c => c.id !== id));
+    const handleDelete = () => {
+        deleteCategory(confirmDelete.id).then(() => {
+            setCategories(categories.filter(c => c.id !== confirmDelete.id));
+            setConfirmDelete(null);
         });
     };
 
@@ -85,7 +87,7 @@ function Categories() {
                                     <span className="text-sm">{cat.name}</span>
                                 </div>
                                 <button
-                                    onClick={() => handleDelete(cat.id)}
+                                    onClick={() => setConfirmDelete({ id: cat.id, name: cat.name })}
                                     className="text-gray-500 hover:text-red-400 transition text-sm"
                                 >
                                     Excluir
@@ -95,6 +97,33 @@ function Categories() {
                     </div>
                 )}
             </main>
+            {confirmDelete && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 max-w-sm w-full mx-4">
+                        <h2 className="text-white font-semibold mb-2">Excluir categoria</h2>
+                        <p className="text-gray-400 text-sm mb-1">
+                            Tem certeza que deseja excluir <strong className="text-white">"{confirmDelete.name}"</strong>?
+                        </p>
+                        <p className="text-gray-500 text-xs mb-6">
+                            As notas associadas a essa categoria ficarão sem categoria.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setConfirmDelete(null)}
+                                className="flex-1 bg-gray-800 hover:bg-gray-700 text-sm py-2 rounded-lg transition"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="flex-1 bg-red-700 hover:bg-red-600 text-sm py-2 rounded-lg transition"
+                            >
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

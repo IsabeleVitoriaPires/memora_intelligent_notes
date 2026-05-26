@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getNotes, deleteNote } from '../services/api';
+import { getNotes, deleteNote, getCategories } from '../services/api';
 
 function Vault() {
     const [notes, setNotes] = useState([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         getNotes().then(setNotes).finally(() => setLoading(false));
+        getCategories().then(setCategories);
     }, []);
 
     const handleDelete = (id) => {
@@ -18,10 +21,12 @@ function Vault() {
         });
     };
 
-    const filtered = notes.filter(note =>
-        note.title.toLowerCase().includes(search.toLowerCase()) ||
-        note.content.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = notes
+        .filter(note => selectedCategory ? note.category_id == selectedCategory : true)
+        .filter(note =>
+            note.title.toLowerCase().includes(search.toLowerCase()) ||
+            note.content.toLowerCase().includes(search.toLowerCase())
+        );
 
     return (
         <div className="min-h-screen bg-gray-950 text-white">
@@ -51,6 +56,12 @@ function Vault() {
                         >
                             Categorias
                         </button>
+                        <button
+                            onClick={() => navigate('/settings')}
+                            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition text-sm"
+                        >
+                            Configurações
+                        </button>
                     </div>
                 </div>
             </header>
@@ -72,6 +83,31 @@ function Vault() {
                         className="w-full sm:w-72 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition"
                     />
                 </div>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    <button
+                        onClick={() => setSelectedCategory(null)}
+                        className={`px-3 py-1 rounded-full text-xs transition ${
+                            selectedCategory === null
+                                ? 'bg-purple-600 text-white'
+                                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        }`}
+                    >
+                        Todas
+                    </button>
+                    {categories.map(cat => (
+                        <button
+                            key={cat.id}
+                            onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                            className={`px-3 py-1 rounded-full text-xs transition ${
+                                selectedCategory === cat.id
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                            }`}
+                        >
+                            {cat.name}
+                        </button>
+                    ))}
+                </div>
 
                 {/* Content */}
                 {loading ? (
@@ -88,7 +124,9 @@ function Vault() {
                         </button>
                     </div>
                 ) : filtered.length === 0 ? (
-                    <div className="text-center mt-20 text-gray-500">Nenhuma nota encontrada para "{search}"</div>
+                    <div className="text-center mt-20 text-gray-500">
+                        {search ? `Nenhuma nota encontrada para "${search}"` : 'Nenhuma nota nessa categoria ainda.'}
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filtered.map(note => (
@@ -99,22 +137,23 @@ function Vault() {
                                 <h2 className="text-lg font-semibold mb-2 group-hover:text-purple-300 transition">{note.title}</h2>
                                 <p className="text-gray-400 text-sm mb-4 line-clamp-3">{note.content}</p>
                                 <div className="mt-auto">
-                                    {(note.category_name || (note.tags && note.tags.length > 0)) && (
-                                        <div className="flex flex-wrap gap-1.5 mb-3">
-                                            {note.category_name && (
-                                                <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">
-                                                    {note.category_name}
-                                                </span>
-                                            )}
-                                            {note.tags && note.tags.length > 0 && (
-                                                (Array.isArray(note.tags) ? note.tags : note.tags.replace(/[{}]/g, '').split(',')).map((tag, i) => (
+                                    {(() => {
+                                        const tagList = (Array.isArray(note.tags) ? note.tags : (note.tags || '').replace(/[{}]/g, '').split(',')).filter(t => t.trim());
+                                        return (note.category_name || tagList.length > 0) && (
+                                            <div className="flex flex-wrap gap-1.5 mb-3">
+                                                {note.category_name && (
+                                                    <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">
+                                                        {note.category_name}
+                                                    </span>
+                                                )}
+                                                {tagList.map((tag, i) => (
                                                     <span key={i} className="text-xs bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">
                                                         {tag.trim()}
                                                     </span>
-                                                ))
-                                            )}
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => navigate(`/note/${note.id}`)}

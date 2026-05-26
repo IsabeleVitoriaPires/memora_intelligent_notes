@@ -75,3 +75,19 @@ export const deleteCategory = async (id) => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
 };
+
+export const getSettings = async () => {
+    const res = await fetch(`${BASE_URL}/settings`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
+
+export const updateSettings = async (key, value) => {
+    const res = await fetch(`${BASE_URL}/settings`, {
+        method: 'PUT',
+        body: JSON.stringify({ key, value }),
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};

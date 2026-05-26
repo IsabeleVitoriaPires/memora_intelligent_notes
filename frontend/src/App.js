@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Vault from './pages/Vault';
 import NoteEditor from './pages/NoteEditor';
 import Chat from './pages/Chat';
-import Category from './pages/Categories'
+import Category from './pages/Categories';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/note/:id" element={<NoteEditor />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/categories" element={<Category />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </BrowserRouter>
   );

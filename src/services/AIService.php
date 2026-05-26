@@ -11,20 +11,19 @@ class AIService {
         }
 
         $client = new \GuzzleHttp\Client();
-        $response = $client->post('https://chatgpt-42.p.rapidapi.com/gpt4', [
+        $response = $client->post('https://api.groq.com/openai/v1/chat/completions', [
             'headers' => [
-                'Content-Type' => 'application/json',
-                'x-rapidapi-host' => 'chatgpt-42.p.rapidapi.com',
-                'x-rapidapi-key' => $apiKey
+                'Content-Type'  => 'application/json',
+                'Authorization' => 'Bearer ' . $apiKey
             ],
             'json' => [
-                'messages' => $messages,
-                'web_access' => false
+                'model'    => 'llama-3.1-8b-instant',
+                'messages' => $messages
             ]
         ]);
 
         $data = json_decode($response->getBody(), true);
-        return $data['result'] ?? 'Sem resposta';
+        return $data['choices'][0]['message']['content'] ?? 'Sem resposta';
     }
 
     public function classify(array $data){
@@ -33,11 +32,10 @@ class AIService {
         $categories = $data['categories'];
         $categoriesList = implode(', ', $categories);
 
-        $prompt = "Classifique a nota abaixo em UMA das categorias: {$categoriesList}. \n
-        Responda APENAS o nome exato da categoria, nada mais. \n
-        Titulo: {$title} \n
-        Conteudo: {$content}
-        ";
+        $prompt = "Classifique a nota abaixo em UMA das categorias: {$categoriesList}.\n" .
+                  "Responda APENAS o nome exato da categoria, nada mais.\n" .
+                  "Titulo: {$title}\n" .
+                  "Conteudo: {$content}";
 
         return $this->ask([
             ['role' => 'user', 'content' => $prompt]
