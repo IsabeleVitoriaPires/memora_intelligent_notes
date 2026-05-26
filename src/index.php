@@ -37,6 +37,7 @@
     // Chat
     $router->get('chat', fn() => $chatController->getHistory());
     $router->post('chat', fn() => $chatController->sendMessage($data));
+    $router->delete('chat', fn() => $chatController->clearHistory());
 
     // Categories
     $router->get('categories', fn() => $categoriesController->list());

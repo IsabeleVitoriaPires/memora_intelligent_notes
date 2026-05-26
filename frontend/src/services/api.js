@@ -76,6 +76,13 @@ export const deleteCategory = async (id) => {
     return res.json();
 };
 
+ export const clearChatHistory = async () => {
+    const res = await fetch(`${BASE_URL}/chat`, { method: 'DELETE' });
+    
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+};
+
 export const getSettings = async () => {
     const res = await fetch(`${BASE_URL}/settings`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

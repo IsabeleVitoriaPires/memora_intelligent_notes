@@ -1,12 +1,15 @@
 # Memora
 
-Assistente pessoal de anotações com IA. Salve suas notas e converse com a IA sobre o conteúdo que você anotou.
+Assistente pessoal de anotações com IA. Salve suas notas, organize por categorias e converse com a IA sobre o conteúdo que você anotou.
 
 ## Funcionalidades
 
-- CRUD completo de notas com tags
-- Chat com IA que usa suas notas como contexto
-- Histórico de conversas persistente
+- CRUD completo de notas com tags e categorias
+- Classificação automática de notas por IA (opcional, ativável nas configurações)
+- Filtro de notas por categoria
+- Chat com IA que usa suas notas como contexto (busca por relevância)
+- Histórico de conversas persistente com opção de limpar
+- Categorias customizadas com cores
 - Interface responsiva com tema dark
 - Containerização completa com Docker
 
@@ -26,8 +29,8 @@ Assistente pessoal de anotações com IA. Salve suas notas e converse com a IA s
                            │
                            ▼
                     ┌──────────────┐
-                    │  GPT-4 API   │
-                    │  (RapidAPI)  │
+                    │   Groq API   │
+                    │  (llama 3.1) │
                     └──────────────┘
 ```
 
@@ -36,14 +39,14 @@ Assistente pessoal de anotações com IA. Salve suas notas e converse com a IA s
 - **Frontend**: React 18 + Tailwind CSS + React Router
 - **Backend**: PHP 8.3 + Apache
 - **Banco de dados**: PostgreSQL
-- **IA**: GPT-4 via RapidAPI
+- **IA**: Groq API (llama-3.1-8b-instant) — rápida e gratuita
 - **Infraestrutura**: Docker + Docker Compose
 
 ## Pré-requisitos
 
 - [Docker](https://www.docker.com/get-started) instalado
 - [Docker Compose](https://docs.docker.com/compose/install/) instalado
-- Chave de API da RapidAPI (chatgpt-42)
+- Chave de API da [Groq](https://console.groq.com) (gratuita)
 
 ## Como rodar
 
@@ -54,19 +57,15 @@ git clone <url-do-repositorio>
 cd memora
 ```
 
-### 2. Configure as variáveis de ambiente
+### 2. Configure a chave de API
 
-Copie o arquivo de exemplo e preencha com sua chave de API:
-
-```bash
-cp src/.env.example src/.env
-```
-
-Edite o `src/.env` e adicione sua chave:
+Crie uma conta gratuita em [console.groq.com](https://console.groq.com), gere uma API key e adicione no arquivo `src/.env`:
 
 ```
-APIKEY=sua_chave_aqui
+APIKEY=sua_chave_groq_aqui
 ```
+
+> Se o arquivo não existir, crie-o na pasta `src/` com esse conteúdo.
 
 ### 3. Suba os containers
 
@@ -88,23 +87,27 @@ As tabelas do banco de dados são criadas automaticamente na primeira vez que o 
 
 ```
 memora/
-├── src/                    # Backend PHP
-│   ├── index.php           # Roteador da API
-│   ├── connection.php      # Conexão com o banco
+├── src/                         # Backend PHP
+│   ├── index.php                # Roteador da API
+│   ├── connection.php           # Conexão com o banco
 │   ├── controllers/
 │   │   ├── NoteController.php
-│   │   └── ChatController.php
+│   │   ├── ChatController.php
+│   │   ├── CategoriesController.php
+│   │   └── SettingsController.php
 │   └── services/
-│       └── AIService.php   # Integração com a IA
-├── frontend/               # Frontend React
+│       └── AIService.php        # Integração com a IA
+├── frontend/                    # Frontend React
 │   └── src/
 │       ├── pages/
-│       │   ├── Vault.js    # Listagem de notas
-│       │   ├── NoteEditor.js # Criar/editar nota
-│       │   └── Chat.js     # Chat com a IA
+│       │   ├── Vault.js         # Listagem e filtro de notas
+│       │   ├── NoteEditor.js    # Criar/editar nota
+│       │   ├── Chat.js          # Chat com a IA
+│       │   ├── Categories.js    # Gerenciar categorias
+│       │   └── Settings.js      # Configurações do app
 │       └── services/
-│           └── api.js      # Chamadas à API
-├── init.sql                # Script de criação das tabelas
+│           └── api.js           # Chamadas à API
+├── init.sql                     # Script de criação das tabelas
 ├── docker-compose.yml
 └── Dockerfile
 ```
@@ -118,14 +121,21 @@ memora/
 | POST | /notes | Cria nova nota |
 | PUT | /notes/:id | Atualiza nota |
 | DELETE | /notes/:id | Remove nota |
-| POST | /chat | Envia mensagem pra IA |
+| POST | /chat | Envia mensagem para a IA |
 | GET | /chat | Histórico de conversas |
+| DELETE | /chat | Limpa histórico de conversas |
+| GET | /categories | Lista categorias |
+| POST | /categories | Cria categoria |
+| DELETE | /categories/:id | Remove categoria |
+| GET | /settings | Retorna configurações |
+| PUT | /settings | Atualiza configuração |
 
 ## Aprendizados
 
-- Integração com APIs externas (OpenAI/RapidAPI)
+- Integração com APIs de IA (Groq / OpenAI-compatible)
+- RAG simplificado: busca por relevância com ILIKE antes de enviar contexto à IA
 - Arquitetura MVC no backend PHP
-- Gerenciamento de estado no React com hooks
+- Gerenciamento de estado no React com hooks (useState, useEffect, useRef)
 - Containerização multi-serviço com Docker Compose
 - Tratamento de erros em aplicações full-stack
 - CORS e comunicação frontend ↔ backend
@@ -134,6 +144,6 @@ memora/
 
 - [ ] Autenticação de usuários (JWT)
 - [ ] Markdown nas notas
-- [ ] Busca por conteúdo/tags
 - [ ] Streaming de respostas da IA
+- [ ] Busca semântica com embeddings (RAG completo)
 - [ ] Testes unitários e de integração

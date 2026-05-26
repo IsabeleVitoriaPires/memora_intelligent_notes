@@ -69,4 +69,9 @@ class ChatController {
         return $response;
     }
 
+    public function clearHistory(){
+      $this->pdo->exec("DELETE FROM CONVERSATIONS");
+      return ['message' => 'Histórico apagado'];
+  }
+
 }

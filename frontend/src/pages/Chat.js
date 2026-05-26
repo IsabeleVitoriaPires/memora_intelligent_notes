@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sendMessage, getChatHistory } from '../services/api';
+import { sendMessage, getChatHistory, clearChatHistory } from '../services/api';
 
 function Chat() {
     const [messages, setMessages] = useState([]);
@@ -61,8 +61,17 @@ function Chat() {
                 >
                     ← Voltar
                 </button>
+                <button
+                    onClick={() => {
+                        if (window.confirm('Deseja apagar todo o histórico?')) {
+                            clearChatHistory().then(() => setMessages([]));
+                        }
+                    }}
+                    className="text-gray-400 hover:text-white transition"
+                >
+                    Limpar Histórico
+                </button>
             </div>
-
             {/* Lista de mensagens */}
             <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-3">
                 {messages.length === 0 && (
